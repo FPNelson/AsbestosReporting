@@ -37,6 +37,14 @@ public class User {
     }
 
     /**
+     * Set the ID of this user.
+     * @param id The new ID for this user
+     */
+    public void setId(long id) {
+        this.id = id;
+    }
+
+    /**
      * Get the username of this user.
      * @return The username of this user.
      */
