@@ -132,7 +132,7 @@ public class DBTools extends SQLiteOpenHelper {
     public User queryUserByID(long id) {
         SQLiteDatabase db = this.getReadableDatabase();
 
-        Cursor cursor = db.query(false, "users", new String[]{"name", "password"}, "id = ?", new String[]{}, null, null, null, null);
+        Cursor cursor = db.query(false, "users", new String[]{"name", "password"}, "id = ?", new String[]{String.valueOf(id)}, null, null, null, null);
         User user = new User(id, "", "");
 
         if(cursor.moveToFirst()) {
