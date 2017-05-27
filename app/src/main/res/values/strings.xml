@@ -16,4 +16,8 @@
     <string name="permission_rationale">"Contacts permissions are needed for providing email
         completions."
     </string>
+
+    <string name="confirm_registry">Create a new account with email and password?</string>
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
 </resources>

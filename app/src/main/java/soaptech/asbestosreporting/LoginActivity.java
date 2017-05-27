@@ -3,6 +3,9 @@ package soaptech.asbestosreporting;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
@@ -28,6 +31,7 @@ import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -61,6 +65,8 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     private EditText mPasswordView;
     private View mProgressView;
     private View mLoginFormView;
+
+    private User user;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -306,25 +312,24 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
         @Override
         protected Boolean doInBackground(Void... params) {
-            // TODO: attempt authentication against a network service.
+            DBTools dbTools = null;
 
             try {
-                // Simulate network access.
-                Thread.sleep(2000);
-            } catch (InterruptedException e) {
-                return false;
-            }
+                dbTools = new DBTools(getParent(), "example.db", null, 10);
+                user = dbTools.queryUserByName(mEmail);
 
-            for (String credential : DUMMY_CREDENTIALS) {
-                String[] pieces = credential.split(":");
-                if (pieces[0].equals(mEmail)) {
-                    // Account exists, return true if the password matches.
-                    return pieces[1].equals(mPassword);
+                if(user.getId() > 0) {
+                    return user.getPassword().equals(mPassword);
+                } else {
+                    user.setPassword(mPassword);
+                    return true;
                 }
             }
-
-            // TODO: register the new account here.
-            return false;
+            finally {
+                if(dbTools != null) {
+                    dbTools.close();
+                }
+            }
         }
 
         @Override
@@ -332,9 +337,43 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             mAuthTask = null;
             showProgress(false);
 
-            if (success) {
-                finish();
-                LoginActivity.this.startActivity(new android.content.Intent(LoginActivity.this, MainActivity.class));
+            if(success) {
+                if(user.getId() > 0) {
+                    finish();
+                    LoginActivity.this.startActivity(new Intent(LoginActivity.this, MainActivity.class));
+                } else {
+                    DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                            switch(i) {
+                                case DialogInterface.BUTTON_POSITIVE:
+                                    DBTools dbTools = null;
+                                    try {
+                                        finish();
+
+                                        dbTools = new DBTools(getParent(), "example.db", null, 10);
+                                        user.setId(dbTools.insertUser(user));
+
+                                        //Toast.makeText(getParent(), R.string.updatingReport, Toast.LENGTH_SHORT).show();
+                                        LoginActivity.this.startActivity(new Intent(LoginActivity.this, MainActivity.class));
+                                    } finally {
+                                        if(dbTools != null) {
+                                            dbTools.close();
+                                        }
+                                    }
+                                    break;
+
+                                case DialogInterface.BUTTON_NEGATIVE:
+                                    mPasswordView.setError(getString(R.string.error_incorrect_password));
+                                    mPasswordView.requestFocus();
+                                    break;
+                            }
+                        }
+                    };
+
+                    AlertDialog.Builder builder = new AlertDialog.Builder(getParent());
+                    builder.setMessage(R.string.confirm_registry).setPositiveButton(R.string.yes, dialogClickListener).setNegativeButton(R.string.no, dialogClickListener).show();
+                }
             } else {
                 mPasswordView.setError(getString(R.string.error_incorrect_password));
                 mPasswordView.requestFocus();

@@ -104,24 +104,25 @@ public class DBTools extends SQLiteOpenHelper {
     }
 
     /**
-     * Query all users with the specified name in the database.
+     * Query a user with the specified name in the database.
      * @param name Name to search for
-     * @return Array of all users inside the database with the specified name
+     * @return User inside the database with the specified name
      */
-    public User[] queryUsersByName(String name) {
+    public User queryUserByName(String name) {
         SQLiteDatabase db = this.getReadableDatabase();
 
         Cursor cursor = db.query(false, "users", new String[]{"id", "password"}, "name = ?", new String[]{name}, null, null, null, null);
-        User[] users = new User[cursor.getCount()];
+        User user = new User(0, name, "");
 
         if(cursor.moveToFirst()) {
             do {
-                users[cursor.getPosition() + 1] = new User(cursor.getLong(0), name, cursor.getString(1));
+                user.setId(cursor.getLong(0));
+                user.setPassword(cursor.getString(1));
             } while(cursor.moveToNext());
         }
         db.close();
 
-        return users;
+        return user;
     }
 
     /**
