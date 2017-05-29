@@ -17,7 +17,8 @@
         completions."
     </string>
 
-    <string name="confirm_registry">Create a new account with email and password?</string>
+    <string name="confirm_registry_title">Register new account?</string>
+    <string name="confirm_registry_msg">Email: %1$s\nPassword: %2$s</string>
     <string name="yes">Yes</string>
     <string name="no">No</string>
 </resources>

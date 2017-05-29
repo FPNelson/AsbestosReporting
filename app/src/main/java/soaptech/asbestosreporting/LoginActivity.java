@@ -21,6 +21,7 @@ import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.ContactsContract;
+import android.text.Html;
 import android.text.TextUtils;
 import android.view.KeyEvent;
 import android.view.View;
@@ -315,7 +316,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             DBTools dbTools = null;
 
             try {
-                dbTools = new DBTools(getParent(), "example.db", null, 10);
+                dbTools = new DBTools(LoginActivity.this, "example.db", null, 10);
                 user = dbTools.queryUserByName(mEmail);
 
                 if(user.getId() > 0) {
@@ -351,7 +352,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                                     try {
                                         finish();
 
-                                        dbTools = new DBTools(getParent(), "example.db", null, 10);
+                                        dbTools = new DBTools(LoginActivity.this, "example.db", null, 10);
                                         user.setId(dbTools.insertUser(user));
 
                                         //Toast.makeText(getParent(), R.string.updatingReport, Toast.LENGTH_SHORT).show();
@@ -371,8 +372,13 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                         }
                     };
 
-                    AlertDialog.Builder builder = new AlertDialog.Builder(getParent());
-                    builder.setMessage(R.string.confirm_registry).setPositiveButton(R.string.yes, dialogClickListener).setNegativeButton(R.string.no, dialogClickListener).show();
+                    AlertDialog.Builder builder = new AlertDialog.Builder(LoginActivity.this);
+                    builder.setTitle(R.string.confirm_registry_title)
+                            .setMessage(getString(R.string.confirm_registry_msg, mEmail, mPassword))
+                            .setPositiveButton(R.string.yes, dialogClickListener)
+                            .setNegativeButton(R.string.no, dialogClickListener)
+                            .show();
+
                 }
             } else {
                 mPasswordView.setError(getString(R.string.error_incorrect_password));
